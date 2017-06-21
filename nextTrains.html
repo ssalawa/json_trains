@@ -2,17 +2,19 @@
 <html>
 <head>
 	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+        <script type="text/javascript" src="http://www.datejs.com/build/date.js"></script>
+
 	<script type="text/javascript">
 		$(document).ready(function(){
-			$(#btnGetWeather).click(function(){
+			$('#btnGetRoute').click(function(){
 				var requestDataTo = $('#txtToCity').val();
 				var requestDataFrom =$('#txtFromCity').val();
 				
 				var todaytime = new Date();
 				
 				var departureDate = ('0' + todaytime.getDate()).slice(-2)
-									+ ('0' + todaytime.getMonth()).slice(-2)
-									+ (todaytime.getFullYear()).slice(-2);
+									+ ('0' + todaytime.getMonth().toString()).slice(-2)
+									+ (todaytime.getFullYear().toString()).slice(-2);
 									
 				var departureTime = todaytime.getHours() + todaytime.getMinutes() ; 
 				var departOrArrive = "depart";
@@ -31,33 +33,29 @@
 					data: {
 					to:requestDataTo,
 					from:requestDataFrom,
-					date:DepartureDate,
-					time:DepartureTime,
-					timeSel: DepartOrArrive,
+					date:departureDate,
+					time:departureTime,
+					timeSel: departOrArrive,
 					lang:language,
-					alerts: 'true'},
+					alerts: 'true',
+                                        format: 'json'},
 					datatype: 'json',
 					success : function(data){
 					//récupérer les 3 prochains trains à partir de l'heure courante
-					  if(data.error.text != null){
-						resultElement.html(data.error.text);
-					  }
-					  else{
-						$.each( data.items, function( i, item ) {
-							//if (data.connections[i].vias[i].depart.time > departureTime) {
-								resultElement.html(
-								'heure de départ: ' + data.connections[i].vias[i].depart.time + '<br/>' +
-								'retard: ' + Math.floor(data.connections[i].departure.delay / 60) + ' min <br/>' +
-								'temps de parcours: ' + Math.floor(data.connections[i].vias[i].timebetween / 60) + ' min <br/>'
+						$.each( data.connection.slice(0, 3), function( i, item ) {
+                                                                var startDate = new Date(data.connection[i].departure.time*1000) ;
+								resultElement.append(
+								'heure de départ: ' + startDate.toString('HH:mm') + '<br/>' +
+								'retard: ' + Math.floor(data.connection[i].departure.delay / 60) + ' min <br/>' +
+                                                                'temps de parcours: ' + Math.floor(data.connection[i].duration / 60) + ' min <br/><hr/>'
 								);
 								if ( i === 2) {
 									return false;
 								}
 					  }
 						)}
-					}
-				})
-			}
+				});
+			})
 		})
 	</script>
 </head>
