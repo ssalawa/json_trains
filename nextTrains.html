@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(#btnGetWeather).click(function(){
+				var requestDataTo = $('#txtToCity').val();
+				var requestDataFrom =$('#txtFromCity').val();
+				
+				var todaytime = new Date();
+				
+				var departureDate = ('0' + todaytime.getDate()).slice(-2)
+									+ ('0' + todaytime.getMonth()).slice(-2)
+									+ (todaytime.getFullYear()).slice(-2);
+									
+				var departureTime = todaytime.getHours() + todaytime.getMinutes() ; 
+				var departOrArrive = "depart";
+				var language = "FR";
+				
+				var websiteTarget = 'https://api.irail.be/connections/';
+				
+				var resultElement = $('#resultDiv');
+				
+				//var APPIDkey = "b1b15e88fa797225412429c1c50c122a1"; 
+				
+				
+				$.ajax({
+					url: websiteTarget,
+					method: 'get',
+					data: {
+					to:requestDataTo,
+					from:requestDataFrom,
+					date:DepartureDate,
+					time:DepartureTime,
+					timeSel: DepartOrArrive,
+					lang:language,
+					alerts: 'true'},
+					datatype: 'json',
+					success : function(data){
+					//récupérer les 3 prochains trains à partir de l'heure courante
+					  if(data.error.text != null){
+						resultElement.html(data.error.text);
+					  }
+					  else{
+						$.each( data.items, function( i, item ) {
+							//if (data.connections[i].vias[i].depart.time > departureTime) {
+								resultElement.html(
+								'heure de départ: ' + data.connections[i].vias[i].depart.time + '<br/>' +
+								'retard: ' + Math.floor(data.connections[i].departure.delay / 60) + ' min <br/>' +
+								'temps de parcours: ' + Math.floor(data.connections[i].vias[i].timebetween / 60) + ' min <br/>'
+								);
+								if ( i === 2) {
+									return false;
+								}
+					  }
+						)}
+					}
+				})
+			}
+		})
+	</script>
+</head>
+<body style="font-family:Arial">
+	<table>
+		<tr>
+			<td>From City</td>
+			<td><input type="text" id="txtFromCity" /></td>
+		</tr>
+		<tr>
+			<td>To City</td>
+			<td><input type="text" id="txtToCity" /></td>
+		</tr>
+	</table>
+	<input type="button" id="btnGetRoute" value="prochains departs">
+	<br /><br />
+	<div id="resultDiv">
+	</div>
+</body>
+</html>
